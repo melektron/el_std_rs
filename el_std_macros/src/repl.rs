@@ -10,5 +10,5 @@ LICENSE file in the root directory of this source tree.
 */
 
 //! Proc-Macros to simplify the definition of REPL structures
-//! that work together with [`el_std_rs::terminal`]
+//! that work together with [`el_std::terminal`]
 

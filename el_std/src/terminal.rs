@@ -35,7 +35,7 @@ pub use rustyline_async::SharedWriter;
 pub use anstyle::AnsiColor;
 
 
-/// Log formatter used for the default el_std_rs logging setups.
+/// Log formatter used for the default [`el_std`] logging setups.
 /// In most the user doesn't need to use this directly,
 /// [`setup_terminal`] and [`setup_basic_logging`] use it internally.
 fn format_log(buf: &mut Formatter, record: &Record) -> Result<(), std::io::Error> {
@@ -357,7 +357,7 @@ pub trait GetReplIo {
 /// 
 /// ```
 /// use std::sync::Arc;
-/// use el_std_rs::terminal::{
+/// use el_std::terminal::{
 ///     ReplIo,
 ///     TerminalOpts,
 ///     setup_terminal,
@@ -509,7 +509,7 @@ pub trait ReplLineHandler: GetReplIo {
 /// 
 /// ```
 /// use std::sync::Arc;
-/// use el_std_rs::terminal::{
+/// use el_std::terminal::{
 ///     ReplIo,
 ///     TerminalOpts,
 ///     setup_terminal,
