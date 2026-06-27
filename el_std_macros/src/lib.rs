@@ -9,6 +9,6 @@ This source code is licensed under the Apache-2.0 license found in the
 LICENSE file in the root directory of this source tree. 
 */
 
-#![doc = include_str!("../README.md")]
+//! Proc-macros for [`el_std`]. Please refer to [`el_std`] for documentation.
 
 mod repl;
