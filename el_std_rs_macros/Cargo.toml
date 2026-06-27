@@ -1,0 +1,17 @@
+[package]
+name = "el-std-rs-macros"
+version = "0.1.0"
+authors = ["melektron"]
+edition = "2024"
+license = "Apache-2.0"
+description = "Macros for el_std_rs"
+homepage = "https://github.com/melektron/el_std_rs"
+repository = "https://github.com/melektron/el_std_rs"
+readme = "README.md"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "2"
+quote = "1"

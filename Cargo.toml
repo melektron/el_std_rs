@@ -1,0 +1,6 @@
+[workspace]
+resolver = "3"
+members = [
+    "el_std_rs",
+    "el_std_rs_macros"
+]
