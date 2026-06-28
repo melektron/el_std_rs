@@ -420,6 +420,13 @@ pub trait ReplLineHandler: GetReplIo {
         }
     }
 
+    /// Processes REPL input and output stream while polled.
+    /// Exits when the cancellation token provided by 
+    /// [`get_cancellation_token`] is canceled or a readline
+    /// error occurs.
+    /// 
+    /// If no ReplIo is available ([`GetReplIo::get_repl_io`] returns None),
+    /// it returns immediately with `Ok(())`.
     async fn run(self: Arc<Self>) -> Result<(), ReadlineError> {
         let Some(mut rl) = self._get_readline().await else { return Ok(()); };
 
@@ -454,6 +461,13 @@ pub trait ReplLineHandler: GetReplIo {
         }
 
         Ok(())
+    }
+
+    /// equivalent to [`ReplLineHandler::run`], but returns
+    /// wraps the returned result in an [`anyhow::Result`],
+    /// which may be more convenient for use in e.g. [`tokio::join`].
+    async fn run_anyhow(self: Arc<Self>) -> anyhow::Result<()> {
+        Ok(self.run().await?)
     }
 
     /// Called when user submits a line for processing by pressing Enter.
@@ -627,6 +641,7 @@ pub trait ReplCommandHandler: GetReplIo {
     #[doc(hidden)]
     fn _build_command(&self) -> clap::Command {
         let command = clap::Command::new("");
+        let command = BuiltinReplCommands::augment_subcommands(command);
         let command = Self::ClapCommandsEnum::augment_subcommands(command);
         let command = command
             .subcommand_required(true)
@@ -637,25 +652,34 @@ pub trait ReplCommandHandler: GetReplIo {
     }
 
     #[doc(hidden)]
-    fn _try_parse_command(&self, args: Vec<String>) -> Result<Self::ClapCommandsEnum, clap::Error> {
+    #[allow(private_interfaces)]    // this is internal, shouldn't be called by user anyway
+    fn _try_parse_command(&self, args: Vec<String>) -> Result<ParsedReplCommand<Self::ClapCommandsEnum>, clap::Error> {
 
         let command = self._build_command();
         // parse the command from user args. This catches most (if not all)
         // of the incorrect user input errors
-        let mut matches = command.try_get_matches_from(args)?;
-        // convert matched args into internal rust struct
-        let cmd = Self::ClapCommandsEnum::from_arg_matches_mut(&mut matches).map_err(|e| {
-            // format the error with context of the command (just like normal Parser 
-            // impl does it), which also converts it to a standard clap::Error that
-            // will then be shown to the user.
-            // In most cases we'll never get here, as try_get_matches_from() catches
-            // most of the incorrect user input. This would only error if the parsed
-            // command isn't properly augmented with ReplCommands
-            let mut command = self._build_command();
-            e.format(&mut command)
-        })?;
-
-        Ok(cmd)
+        let matches = command.try_get_matches_from(args)?;
+        // convert matched args into internal rust struct. 
+        // First try the user defined commands
+        if let Ok(cmd) = Self::ClapCommandsEnum::from_arg_matches(&matches) {
+            return Ok(ParsedReplCommand::UserDefined(cmd));
+        } 
+        // No user-defined command matched, try matching builtin commands next
+        match BuiltinReplCommands::from_arg_matches(&matches) {
+            Ok(cmd) => { 
+                return Ok(ParsedReplCommand::Builtin(cmd)); 
+            }
+            Err(e) => {
+                // The parsed command matched non of the defined subcommands.
+                // Since we define the subcommands only using Subcommand derives,
+                // this should normally not be possible.
+                // We format the error with context of the command (just like normal Parser 
+                // impl does it), which also converts it to a standard clap::Error that
+                // will then be shown to the user.
+                let mut command = self._build_command();
+                return Err(e.format(&mut command));
+            }
+        }
     }
 
     fn print_long_help(&self) {
@@ -705,8 +729,14 @@ where
                     );
                 }
             }
-            // call user handler
-            Ok(cmd) => self.handle_command(cmd).await?
+            // handle builtin subcommands
+            Ok(ParsedReplCommand::Builtin(cmd)) => match cmd {
+                BuiltinReplCommands::HelpShortcut => {
+                    self.print_long_help();
+                }
+            }
+            // call user handler for any user defined commands
+            Ok(ParsedReplCommand::UserDefined(cmd)) => self.handle_command(cmd).await?
         };
 
         Ok(())
@@ -724,4 +754,26 @@ where
     fn get_cancellation_token(&self) -> Option<CancellationToken> {
         ReplCommandHandler::get_cancellation_token(self)
     }
+}
+
+// A few builtin commands for the [`ReplCommandHandler`]
+#[derive(Subcommand, Debug)]
+enum BuiltinReplCommands {
+    // custom hidden help command to act as a shortcut for the global help command.
+    // This has to be done because the normal help command cannot be modified with mut_subcommand.
+    // (this does not replace individual --help's of subcommands or "help <COMMAND>")
+    #[command(
+        name = "?",
+        hide = true,
+        about = "Shortcut for 'help'.\nThis doesn't replace 'help <SUBCOMMAND>'."
+    )]
+    HelpShortcut,
+
+}
+
+/// Used internally to store either a parsed user command
+/// or a parsed internal command
+enum ParsedReplCommand<A> {
+    Builtin(BuiltinReplCommands),
+    UserDefined(A)
 }
