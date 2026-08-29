@@ -10,7 +10,7 @@ repository = "https://github.com/melektron/el_std_rs"
 readme = "../README.md"
 
 [dependencies]
-el_std_macros = { version = "0.1.0", path = "../el_std_macros" }
+el_std_macros = { version = "0.2.0", path = "../el_std_macros" }
 anstyle = "1.0.14"
 anyhow = "1.0.103"
 clap = "4.6.1"
