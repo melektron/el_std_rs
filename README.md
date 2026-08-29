@@ -23,5 +23,6 @@ While I might write more comprehensive documentation for some modules along the 
 - `el_std::or_log`: Methods to log a message if a result is an error.
 - `el_std::poisonless_lock`: Methods for std::sync::poison::Mutex and similar to intentfully unwrap lock results.
 - `el_std::terminal`: Functionality to setup an async interactive terminal REPL with non-interfering logging and a good starting point for log formatting based on env_logger. This module serves a similar purpose to [`el_std_py`](https://github.com/melektron/el_std_py)'s `el.terminal`.
+- `el_std::autowrap`: Derive macros to derive common types (Deref, ...) for simple wrapper structs (`struct A(B);`).
 
 These modules are currently not configurable via Cargo feature flags.
