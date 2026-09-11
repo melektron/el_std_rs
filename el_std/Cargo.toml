@@ -1,6 +1,6 @@
 [package]
 name = "el_std"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["melektron"]
 edition = "2024"
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ repository = "https://github.com/melektron/el_std_rs"
 readme = "../README.md"
 
 [dependencies]
-el_std_macros = { version = "0.3.0", path = "../el_std_macros" }
+el_std_macros = { version = "0.3.1", path = "../el_std_macros" }
 
 anyhow = { version = "1.0.103", optional = true }
 anstyle = { version = "1.0.14", optional = true }

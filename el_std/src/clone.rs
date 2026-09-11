@@ -35,7 +35,18 @@ SOFTWARE.
 */
 
 
-/// A helper macro to clone variables into closures or async blocks easily.
+/// A helper macro to clone variables into closures or async blocks easily
+/// using the following syntax:
+/// ```rust
+/// let s1: String = String::from("Hello");
+/// let s2: String = String::from("World");
+/// let res = el_std::clone!(s1, s2 => move |data: &str| {
+///     assert_eq!(s1, String::from("Hello"));
+///     assert_eq!(s2, String::from("World"));
+///     format!("{s1} {s2}{data}")
+/// });
+/// assert_eq!(res("!"), format!("{} {}{}", s1, s2, "!"));
+/// ```
 ///
 /// This macro supports several usage patterns:
 ///
@@ -43,6 +54,38 @@ SOFTWARE.
 /// - Clone variables into an `async move` block.
 /// - Clone variables into a regular closure with or without explicit `move`.
 /// - Clone variables into an `async move` closure with or without explicit `move`.
+/// 
+/// In all cases, it is possible to specify an arbitrary amount of variables (within 
+/// reasonable bounds) to be cloned into the block or closure. Each variable can optionally
+/// be declared as mutable in the cloning list:
+/// 
+/// ```rust
+/// let s1: String = String::from("Hello");
+/// let s2: String = String::from("World");
+/// let res = el_std::clone!(mut s1, s2 => {
+///     s1.push_str(", mutated!");
+///     assert_eq!(s2, String::from("World"));
+///     s1.clone()
+/// });
+/// assert_eq!(res, "Hello, mutated!");
+/// assert_eq!(s1, "Hello"); // original untouched, only the clone was mutable
+/// ```
+/// 
+/// Cloning zero variables is possible, but serves no purpose outside of experimentation
+/// and should be avoided:
+/// 
+/// ```rust
+/// let f = el_std::clone!(=> || { 42 });
+/// assert_eq!(f(), 42);
+/// ```
+/// 
+/// For closures or async closures, the variable is additionally cloned on every invocation,
+/// which is typically desirable for shared-ownership types such as Arc and avoids lifetime
+/// issues in async blocks. For this reason, mutations performed on the clone do not 
+/// survive across multiple calls of the closure.
+/// 
+/// Even if the move keyword of the closure (`move || {}`) is omitted, it is always (implicitly) 
+/// added, because cloning variables into closures makes little sense without the move keyword.
 #[macro_export]
 macro_rules! clone {
     ( $($rest:tt)* ) => {
