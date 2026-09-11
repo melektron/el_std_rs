@@ -18,11 +18,16 @@ I am currently not targeting any specific rust version, but in general I will no
 
 ## Modules and Documentation
 
-While I might write more comprehensive documentation for some modules along the way, I will at least try to maintain an up-to-date list of all available functionality:
+While I might write more comprehensive documentation for some modules along the way, I will at least try to maintain an up-to-date list of all available functionality below.
+In order to support a wider range of possible use-cases (such as embedded or no_std environments), each module and it's dependencies are enabled with a corresponding feature. By default, no features are enabled, so every piece of functionality is opt in.
 
-- `el_std::or_log`: Methods to log a message if a result is an error.
-- `el_std::poisonless_lock`: Methods for std::sync::poison::Mutex and similar to intentfully unwrap lock results.
-- `el_std::terminal`: Functionality to setup an async interactive terminal REPL with non-interfering logging and a good starting point for log formatting based on env_logger. This module serves a similar purpose to [`el_std_py`](https://github.com/melektron/el_std_py)'s `el.terminal`.
-- `el_std::autowrap`: Derive macros to derive common types (Deref, ...) for simple wrapper structs (`struct A(B);`).
-
-These modules are currently not configurable via Cargo feature flags.
+- Feature `or_log` (requires std)
+  - `el_std::or_log`: Methods to log a message using the `log` crate if a result is an error.
+- Feature `poisonless_lock` (requires std)
+  - `el_std::poisonless_lock`: Methods for `std::sync::poison::Mutex` and similar to intentfully unwrap lock results.
+- Feature `terminal` (requires std)
+  - `el_std::terminal`: Functionality to setup an async interactive terminal REPL with non-interfering logging and a good starting point for log formatting based on env_logger. This module serves a similar purpose to [`el_std_py`](https://github.com/melektron/el_std_py)'s `el.terminal`. ATM this only works in tokio environments.
+- Feature `autowrap`
+  - `el_std::autowrap`: Derive macros to derive common types (Deref, ...) for simple wrapper structs (`struct A(B);`).
+- Feature `clone`
+  - `el_std::clone`: Macro to simplify the process of cloning shared objects into closures or async blocks. This macro builds upon https://github.com/crates-dev/clonelicious by adding the option for mutable variables.

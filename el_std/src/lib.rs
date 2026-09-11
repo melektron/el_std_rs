@@ -10,7 +10,13 @@
 //! I am currently not targeting any specific rust version, but in general I will not refrain from using the latest rust features when I need them, so compatibility with older rust versions is not guaranteed.
 //! 
 
+#[cfg(feature = "poisonless_lock")]
 pub mod poisonless_lock;
+#[cfg(feature = "or_log")]
 pub mod or_log;
+#[cfg(feature = "terminal")]
 pub mod terminal;
+#[cfg(feature = "autowrap")]
 pub mod autowrap;
+#[cfg(feature = "clone")]
+mod clone;

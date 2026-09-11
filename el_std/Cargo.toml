@@ -1,6 +1,6 @@
 [package]
 name = "el_std"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["melektron"]
 edition = "2024"
 license = "Apache-2.0"
@@ -10,17 +10,50 @@ repository = "https://github.com/melektron/el_std_rs"
 readme = "../README.md"
 
 [dependencies]
-el_std_macros = { version = "0.2.0", path = "../el_std_macros" }
-anstyle = "1.0.14"
-anyhow = "1.0.103"
-clap = "4.6.1"
-env_logger = "0.11.11"
-log = "0.4.33"
-rustyline-async = "0.4.9"
-shell-words = "1.1.1"
-tokio = { version = "1.52.3", features = ["full"] }
-tokio-util = "0.7.18"
+el_std_macros = { version = "0.3.0", path = "../el_std_macros" }
+
+anyhow = { version = "1.0.103", optional = true }
+anstyle = { version = "1.0.14", optional = true }
+clap = { version = "4.6.1", optional = true }
+env_logger = { version = "0.11.11", optional = true }
+log = { version = "0.4.33", optional = true }
+rustyline-async = { version = "0.4.9", optional = true }
+shell-words = { version = "1.1.1", optional = true }
+tokio = { version = "1.52.3", features = ["full"], optional = true }
+tokio-util = { version = "0.7.18", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
 testing_logger = "0.1.1"
+tokio = { version = "1.53.1", features = ["full"] }
+
+[features]
+
+# features compatible with no_std
+clone = []
+autowrap = []
+
+
+# features requiring std
+full = [
+    "terminal",
+    "poisonless_lock",
+    "or_log",
+    "clone",
+    "autowrap",
+]
+terminal = [
+    "dep:anyhow",
+    "dep:anstyle",
+    "dep:clap",
+    "dep:env_logger",
+    "dep:log",
+    "dep:rustyline-async",
+    "dep:shell-words",
+    "dep:tokio",
+    "dep:tokio-util",
+]
+poisonless_lock = []
+or_log = [
+    "dep:log"
+]
